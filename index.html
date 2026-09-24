@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Matriz de Desenvolvimento e Talentos - 70/20/10</title>
+    <title>Matriz 70/20/10 - Gestão de Talentos SAC</title>
+    <!-- Tailwind CSS, Chart.js & FontAwesome -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -11,399 +12,616 @@
         .badge-20 { background-color: #10B981; color: white; }
         .badge-70 { background-color: #3B82F6; color: white; }
         .badge-10 { background-color: #F59E0B; color: white; }
-        .tab-active { border-bottom: 3px solid #0EA5E9; color: #0EA5E9; font-weight: bold; }
+        .nav-tab-active { border-bottom: 3px solid #10B981; color: #10B981; font-weight: bold; }
     </style>
 </head>
-<body class="bg-slate-100 min-h-screen text-slate-800 font-sans pb-12">
+<body class="bg-slate-100 min-h-screen text-slate-800 font-sans pb-16">
 
-    <!-- Header -->
-    <header class="bg-slate-900 text-white shadow-lg border-b border-slate-800">
-        <div class="max-w-7xl mx-auto px-4 py-5 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div>
-                <h1 class="text-2xl font-bold flex items-center gap-2">
-                    <i class="fa-solid fa-chart-line text-emerald-400"></i>
-                    Matriz de Desenvolvimento e Talentos 70/20/10
-                </h1>
-                <p class="text-xs text-slate-400 mt-1">Gestão de SAC • Avaliação de Performance (50%), Comportamento (25%) e Potencial (25%)</p>
+    <!-- Header Principal -->
+    <header class="bg-slate-900 text-white shadow-lg sticky top-0 z-40 border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-emerald-500 p-2 rounded-lg text-slate-900 font-bold text-xl">
+                    <i class="fa-solid fa-layer-group"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight flex items-center gap-2">
+                        Matriz 70/20/10 <span class="text-xs bg-sky-600 text-white px-2 py-0.5 rounded font-normal">SAC Operations</span>
+                    </h1>
+                    <p class="text-xs text-slate-400">Gestão de Talentos, Calibração e PDI Operacional</p>
+                </div>
             </div>
             
-            <!-- Botões de Ação / Backup -->
-            <div class="flex flex-wrap items-center gap-2">
-                <button onclick="exportData()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
-                    <i class="fa-solid fa-download text-emerald-400"></i> Exportar Backup
+            <!-- Ações Rápidas -->
+            <div class="flex items-center gap-2">
+                <button onclick="exportToCSV()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-file-excel"></i> Exportar CSV
                 </button>
-                <label class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition">
-                    <i class="fa-solid fa-upload text-sky-400"></i> Importar Backup
-                    <input type="file" id="importFile" onchange="importData(event)" class="hidden" accept=".json">
-                </label>
-                <button onclick="exportToCSV()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition shadow">
-                    <i class="fa-solid fa-file-csv"></i> Baixar CSV
+                <button onclick="openModal()" class="bg-sky-600 hover:bg-sky-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition shadow">
+                    <i class="fa-solid fa-user-plus"></i> Novo Operador
                 </button>
             </div>
         </div>
 
-        <!-- Menu de Navegação por Abas -->
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 border-t border-slate-800 pt-2 flex gap-6 text-sm text-slate-400">
-            <button onclick="switchTab('gestao')" id="tab-gestao" class="pb-2 tab-active transition flex items-center gap-2">
-                <i class="fa-solid fa-users"></i> Gestão & Lançamentos
+        <!-- Menu de Navegação Global (Abas do PDF) -->
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-slate-800 pt-1 flex overflow-x-auto gap-4 text-xs font-medium text-slate-400">
+            <button onclick="switchTab('visao-geral')" id="tab-visao-geral" class="pb-2.5 pt-2 nav-tab-active flex items-center gap-1.5 whitespace-nowrap">
+                <i class="fa-solid fa-chart-pie"></i> Visão Geral
             </button>
-            <button onclick="switchTab('dashboards')" id="tab-dashboards" class="pb-2 transition flex items-center gap-2">
-                <i class="fa-solid fa-chart-pie"></i> Gráficos & Visão Geral
+            <button onclick="switchTab('checklist')" id="tab-checklist" class="pb-2.5 pt-2 flex items-center gap-1.5 whitespace-nowrap">
+                <i class="fa-solid fa-list-check"></i> Checklist Encontros
             </button>
-            <button onclick="switchTab('analises')" id="tab-analises" class="pb-2 transition flex items-center gap-2">
-                <i class="fa-solid fa-id-card"></i> Análise Individual & Feedback
+            <button onclick="switchTab('avaliacao')" id="tab-avaliacao" class="pb-2.5 pt-2 flex items-center gap-1.5 whitespace-nowrap">
+                <i class="fa-solid fa-users text-sky-400"></i> Avaliação Operadores
             </button>
-        </div>
+            <button onclick="switchTab('calibracao')" id="tab-calibracao" class="pb-2.5 pt-2 flex items-center gap-1.5 whitespace-nowrap">
+                <i class="fa-solid fa-table-cells text-amber-400"></i> Calibração 9-Box
+            </button>
+            <button onclick="switchTab('pdi')" id="tab-pdi" class="pb-2.5 pt-2 flex items-center gap-1.5 whitespace-nowrap">
+                <i class="fa-solid fa-bullseye text-purple-400"></i> PDI & Sucessão
+            </button>
+            <button onclick="switchTab('assistente-ia')" id="tab-assistente-ia" class="pb-2.5 pt-2 flex items-center gap-1.5 whitespace-nowrap">
+                <i class="fa-solid fa-robot text-emerald-400"></i> Assistente IA
+            </button>
+        </nav>
     </header>
 
-    <main class="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 space-y-8">
+    <main class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 space-y-6">
 
-        <!-- Status de Armazenamento -->
-        <div id="saveAlert" class="hidden bg-emerald-100 border border-emerald-400 text-emerald-800 px-4 py-2 rounded-lg text-xs flex justify-between items-center shadow-sm">
-            <span><i class="fa-solid fa-circle-check mr-2"></i> Alterações salvas automaticamente no seu navegador!</span>
-            <span class="text-slate-500 text-[10px]" id="lastSaveTime"></span>
-        </div>
-
-        <!-- KPI Cards (Sempre Visíveis) -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-                <span class="text-xs font-semibold text-slate-500 uppercase">Total Avaliados</span>
-                <div class="text-3xl font-extrabold text-slate-800 mt-1" id="totalCount">0</div>
-            </div>
-            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-emerald-500">
-                <span class="text-xs font-semibold text-emerald-600 uppercase">20% High Performers / Talentos</span>
-                <div class="text-3xl font-extrabold text-slate-800 mt-1" id="count20">0 <span class="text-xs font-normal text-slate-400" id="pct20">(0%)</span></div>
-            </div>
-            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-blue-500">
-                <span class="text-xs font-semibold text-blue-600 uppercase">70% Base Operacional Solida</span>
-                <div class="text-3xl font-extrabold text-slate-800 mt-1" id="count70">0 <span class="text-xs font-normal text-slate-400" id="pct70">(0%)</span></div>
-            </div>
-            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-amber-500">
-                <span class="text-xs font-semibold text-amber-600 uppercase">10% Desenvolvimento Prioritário</span>
-                <div class="text-3xl font-extrabold text-slate-800 mt-1" id="count10">0 <span class="text-xs font-normal text-slate-400" id="pct10">(0%)</span></div>
-            </div>
-        </div>
-
-        <!-- ABA 1: GESTÃO & LANÇAMENTOS -->
-        <div id="section-gestao" class="space-y-8">
-            <!-- Formulário -->
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4">
-                <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                    <i class="fa-solid fa-user-plus text-sky-600"></i> Registrar / Avaliar Operador
-                </h2>
-                <form id="operatorForm" onsubmit="handleFormSubmit(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <input type="hidden" id="operatorId">
-                    
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Nome Completo</label>
-                        <input type="text" id="nome" required class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-sky-500 outline-none">
+        <!-- ==================== TELA 1: VISÃO GERAL ==================== -->
+        <div id="sec-visao-geral" class="space-y-6">
+            <!-- Banner Consolidado -->
+            <div class="bg-gradient-to-r from-slate-900 via-sky-950 to-slate-900 text-white p-6 rounded-xl shadow-md flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border border-slate-800">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h2 class="text-xl font-bold">Painel Consolidado do Projeto 70/20/10</h2>
+                        <span class="bg-emerald-500/20 text-emerald-300 text-[10px] border border-emerald-500/30 font-semibold px-2 py-0.5 rounded-full">em andamento</span>
                     </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Setor / Operação SAC</label>
-                        <input type="text" id="setor" required placeholder="Ex: SAC Receptivo" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-sky-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Performance (0 a 10) - Peso 50%</label>
-                        <input type="number" step="0.1" min="0" max="10" id="performance" required class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-sky-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Comportamento (1 a 5) - Peso 25%</label>
-                        <input type="number" step="0.1" min="1" max="5" id="comportamento" required class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-sky-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Potencial (1 a 5) - Peso 25%</label>
-                        <input type="number" step="0.1" min="1" max="5" id="potencial" required class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-sky-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Evidências / Justificativa</label>
-                        <input type="text" id="evidencias" placeholder="Exemplos concretos de fatos/dados" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-sky-500 outline-none">
-                    </div>
-
-                    <div class="md:col-span-3 flex justify-end gap-2 mt-2">
-                        <button type="button" onclick="resetForm()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm font-semibold transition">Limpar</button>
-                        <button type="submit" class="bg-sky-600 hover:bg-sky-500 text-white px-6 py-2 rounded-lg text-sm font-semibold transition shadow">Salvar Operador</button>
-                    </div>
-                </form>
+                    <p class="text-xs text-slate-300 mt-1 max-w-2xl">Acompanhe a distribuição da equipe de SAC, valide os critérios com médias e evidências e garanta a calibração justa entre as coordenações.</p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="exportToCSV()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition">
+                        <i class="fa-solid fa-file-csv"></i> Baixar para Google Sheets
+                    </button>
+                    <button onclick="openModal()" class="bg-sky-600 hover:bg-sky-500 text-white px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition">
+                        <i class="fa-solid fa-plus"></i> Novo Operador
+                    </button>
+                </div>
             </div>
 
-            <!-- Tabela -->
+            <!-- Cards de Métricas (KPIs) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                    <div class="flex justify-between items-center text-slate-500 text-xs font-bold uppercase">
+                        <span>TOTAL AVALIADO</span>
+                        <i class="fa-solid fa-users text-slate-400 text-lg"></i>
+                    </div>
+                    <div class="text-3xl font-black text-slate-800 mt-2" id="kpi-total">0</div>
+                    <span class="text-[10px] text-slate-400">Operadores registrados</span>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-emerald-500">
+                    <div class="flex justify-between items-center text-emerald-600 text-xs font-bold uppercase">
+                        <span>20% TALENTOS</span>
+                        <i class="fa-solid fa-user-astronaut text-emerald-500 text-lg"></i>
+                    </div>
+                    <div class="text-3xl font-black text-slate-800 mt-2" id="kpi-20">0</div>
+                    <span class="text-[10px] text-slate-400" id="kpi-20-sub">Metas de aceleração e retenção</span>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-blue-500">
+                    <div class="flex justify-between items-center text-blue-600 text-xs font-bold uppercase">
+                        <span>70% BASE OPERACIONAL</span>
+                        <i class="fa-solid fa-user-check text-blue-500 text-lg"></i>
+                    </div>
+                    <div class="text-3xl font-black text-slate-800 mt-2" id="kpi-70">0</div>
+                    <span class="text-[10px] text-slate-400" id="kpi-70-sub">Consistência e estabilidade</span>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-amber-500">
+                    <div class="flex justify-between items-center text-amber-600 text-xs font-bold uppercase">
+                        <span>10% PRIORITÁRIO</span>
+                        <i class="fa-solid fa-triangle-exclamation text-amber-500 text-lg"></i>
+                    </div>
+                    <div class="text-3xl font-black text-slate-800 mt-2" id="kpi-10">0</div>
+                    <span class="text-[10px] text-slate-400" id="kpi-10-sub">Acompanhamento e PDI frequente</span>
+                </div>
+            </div>
+
+            <!-- Gráficos Visuais -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                    <h3 class="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-pie text-sky-600"></i> Distribuição Atual vs Referência
+                    </h3>
+                    <div class="h-60 flex justify-center items-center">
+                        <canvas id="chartDonut"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                    <h3 class="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-line text-emerald-600"></i> Performance (50%) vs Potencial (25%)
+                    </h3>
+                    <div class="h-60">
+                        <canvas id="chartScatter"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resumo Rápido da Matriz -->
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                 <div class="p-4 border-b border-slate-100 flex justify-between items-center">
-                    <h3 class="font-bold text-slate-800">Operadores Avaliados</h3>
-                    <span class="text-xs text-slate-400">Cálculo Automático: (Perf × 50%) + (Comp × 2,5 × 25%) + (Pot × 2,5 × 25%)</span>
+                    <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-list text-slate-500"></i> Resumo Rápido da Matriz Consolidada
+                    </h3>
+                    <button onclick="switchTab('avaliacao')" class="text-xs font-semibold text-sky-600 hover:text-sky-800">Ver Todos / Editar &rarr;</button>
                 </div>
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse text-sm">
-                        <thead>
-                            <tr class="bg-slate-50 text-slate-500 text-xs font-semibold uppercase">
-                                <th class="p-3 border-b">Nome</th>
-                                <th class="p-3 border-b">Setor</th>
-                                <th class="p-3 border-b">Performance (50%)</th>
-                                <th class="p-3 border-b">Comportamento (25%)</th>
-                                <th class="p-3 border-b">Potencial (25%)</th>
-                                <th class="p-3 border-b">Nota Final</th>
-                                <th class="p-3 border-b">Grupo 70/20/10</th>
-                                <th class="p-3 border-b text-center">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="operatorsTable" class="divide-y divide-slate-100 text-slate-700">
-                            <!-- Conteúdo dinâmico -->
-                        </tbody>
+                    <table class="w-full text-left text-xs">
+                        <tr class="bg-slate-50 text-slate-500 font-bold uppercase border-b">
+                            <th class="p-3">OPERADOR</th>
+                            <th class="p-3">EQUIPE/SETOR</th>
+                            <th class="p-3">PERFORMANCE (50%)</th>
+                            <th class="p-3">COMPORTAMENTO (25%)</th>
+                            <th class="p-3">POTENCIAL (25%)</th>
+                            <th class="p-3">NOTA FINAL</th>
+                            <th class="p-3">GRUPO 70/20/10</th>
+                            <th class="p-3">EVIDÊNCIAS</th>
+                        </tr>
+                        <tbody id="table-resumo-body" class="divide-y divide-slate-100 text-slate-700"></tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <!-- ABA 2: GRÁFICOS & VISÃO GERAL -->
-        <div id="section-dashboards" class="hidden space-y-8">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Gráfico Rosca -->
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                    <h3 class="text-md font-bold text-slate-800 mb-4 flex items-center gap-2">
-                        <i class="fa-solid fa-chart-pie text-sky-600"></i> Distribuição Curva 70/20/10
-                    </h3>
-                    <div class="h-64 flex justify-center">
-                        <canvas id="donutChart"></canvas>
+        <!-- ==================== TELA 2: CHECKLIST ENCONTROS ==================== -->
+        <div id="sec-checklist" class="hidden space-y-6">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-list-check text-sky-600"></i> Roteiro e Checklist dos 8 Encontros de Gestão
+                        </h2>
+                        <p class="text-xs text-slate-500">Guia de alinhamento com a Coordenadora Geral e Coordenadoras de SAC</p>
+                    </div>
+                    <div class="bg-slate-50 border border-slate-200 p-3 rounded-lg text-right min-w-[180px]">
+                        <span class="text-[10px] text-slate-500 font-bold uppercase">Progresso Geral</span>
+                        <div class="text-2xl font-black text-emerald-600" id="checklist-progress-text">0%</div>
+                        <div class="w-full bg-slate-200 h-2 rounded-full mt-1 overflow-hidden">
+                            <div id="checklist-progress-bar" class="bg-emerald-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Gráfico de Barras -->
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                    <h3 class="text-md font-bold text-slate-800 mb-4 flex items-center gap-2">
-                        <i class="fa-solid fa-chart-bar text-emerald-600"></i> Comparativo de Notas Finais
-                    </h3>
-                    <div class="h-64">
-                        <canvas id="barChart"></canvas>
+                <!-- Lista de Encontros -->
+                <div class="space-y-4" id="checklist-list"></div>
+            </div>
+        </div>
+
+        <!-- ==================== TELA 3: AVALIAÇÃO OPERADORES ==================== -->
+        <div id="sec-avaliacao" class="hidden space-y-6">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                    <div class="flex items-center gap-3 w-full sm:w-auto">
+                        <select id="filter-group" onchange="renderAvaliacaoTable()" class="border border-slate-300 rounded-lg p-2 text-xs font-semibold outline-none focus:ring-2 focus:ring-sky-500">
+                            <option value="ALL">Todos os Grupos</option>
+                            <option value="20%">20% - Talentos</option>
+                            <option value="70%">70% - Base Operacional</option>
+                            <option value="10%">10% - Desenvol. Prioritário</option>
+                        </select>
+                        <input type="text" id="filter-search" oninput="renderAvaliacaoTable()" placeholder="Buscar por nome ou coord..." class="border border-slate-300 rounded-lg p-2 text-xs w-full sm:w-64 outline-none focus:ring-2 focus:ring-sky-500">
+                    </div>
+                    <button onclick="openModal()" class="bg-sky-600 hover:bg-sky-500 text-white px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition shadow">
+                        <i class="fa-solid fa-user-plus"></i> Avaliar Novo Colaborador
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-500 font-bold uppercase border-b">
+                                <th class="p-3">OPERADOR / COORD</th>
+                                <th class="p-3">TEMPO EMPRESA</th>
+                                <th class="p-3">PERFORMANCE (50%)</th>
+                                <th class="p-3">COMPORTAMENTO (25%)</th>
+                                <th class="p-3">POTENCIAL (25%)</th>
+                                <th class="p-3">NOTA FINAL</th>
+                                <th class="p-3">CLASSIFICAÇÃO</th>
+                                <th class="p-3">EVIDÊNCIAS / STATUS</th>
+                                <th class="p-3 text-center">AÇÕES</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-avaliacao-body" class="divide-y divide-slate-100 text-slate-700"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== TELA 4: CALIBRAÇÃO 9-BOX ==================== -->
+        <div id="sec-calibracao" class="hidden space-y-6">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <div class="mb-6">
+                    <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-table-cells text-amber-500"></i> Painel de Calibração (Encontro 5)
+                    </h2>
+                    <p class="text-xs text-slate-500">Ajuste notas extremas, valide evidências e reduza subjetividades entre coordenadoras. Exige evidências registradas para notas 1 e 5.</p>
+                </div>
+
+                <!-- Matriz 3x3 (9-Box Grid) -->
+                <div class="grid grid-cols-3 gap-3 bg-slate-200 p-3 rounded-xl border border-slate-300">
+                    <!-- Linha 1: Potencial Alto -->
+                    <div class="bg-amber-50 p-3 rounded-lg border border-amber-200 min-h-[120px]">
+                        <span class="text-[10px] font-extrabold text-amber-700 block uppercase">Atenção em Performance</span>
+                        <div id="box-1" class="mt-2 space-y-1"></div>
+                    </div>
+                    <div class="bg-emerald-50 p-3 rounded-lg border border-emerald-200 min-h-[120px]">
+                        <span class="text-[10px] font-extrabold text-emerald-700 block uppercase">Forte Desempenho / Alto Potencial</span>
+                        <div id="box-2" class="mt-2 space-y-1"></div>
+                    </div>
+                    <div class="bg-emerald-100 p-3 rounded-lg border border-emerald-300 min-h-[120px]">
+                        <span class="text-[10px] font-extrabold text-emerald-800 block uppercase">Estrela / Sucessor (Top 20%)</span>
+                        <div id="box-3" class="mt-2 space-y-1"></div>
+                    </div>
+
+                    <!-- Linha 2: Potencial Médio -->
+                    <div class="bg-rose-50 p-3 rounded-lg border border-rose-200 min-h-[120px]">
+                        <span class="text-[10px] font-extrabold text-rose-700 block uppercase">Risco de Desempenho (10%)</span>
+                        <div id="box-4" class="mt-2 space-y-1"></div>
+                    </div>
+                    <div class="bg-sky-50 p-3 rounded-lg border border-sky-200 min-h-[120px]">
+                        <span class="text-[10px] font-extrabold text-sky-700 block uppercase">Mantenedor do Padrão (70%)</span>
+                        <div id="box-5" class="mt-2 space-y-1"></div>
+                    </div>
+                    <div class="bg-emerald-50 p-3 rounded-lg border border-emerald-200 min-h-[120px]">
+                        <span class="text-[10px] font-extrabold text-emerald-700 block uppercase">Top Performer / Referência</span>
+                        <div id="box-6" class="mt-2 space-y-1"></div>
+                    </div>
+
+                    <!-- Linha 3: Potencial Baixo -->
+                    <div class="bg-rose-100 p-3 rounded-lg border border-rose-300 min-h-[120px]">
+                        <span class="text-[10px] font-extrabold text-rose-800 block uppercase">Insuficiente / Crítico</span>
+                        <div id="box-7" class="mt-2 space-y-1"></div>
+                    </div>
+                    <div class="bg-sky-50 p-3 rounded-lg border border-sky-200 min-h-[120px]">
+                        <span class="text-[10px] font-extrabold text-sky-700 block uppercase">Especialista de Rotina</span>
+                        <div id="box-8" class="mt-2 space-y-1"></div>
+                    </div>
+                    <div class="bg-sky-100 p-3 rounded-lg border border-sky-300 min-h-[120px]">
+                        <span class="text-[10px] font-extrabold text-sky-800 block uppercase">Forte Entregador</span>
+                        <div id="box-9" class="mt-2 space-y-1"></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ABA 3: ANÁLISE INDIVIDUAL & FEEDBACK -->
-        <div id="section-analises" class="hidden space-y-8">
+        <!-- ==================== TELA 5: PDI & SUCESSÃO ==================== -->
+        <div id="sec-pdi" class="hidden space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Coluna 20% -->
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 border-t-4 border-t-emerald-500 space-y-4">
+                    <div class="flex items-center gap-2 text-emerald-600 font-bold text-sm">
+                        <i class="fa-solid fa-crown text-lg"></i>
+                        <span>20% - Talentos & Sucessão</span>
+                    </div>
+                    <p class="text-xs text-slate-500">Desenvolvimento acelerado, projetos estratégicos e preparação para liderança técnica.</p>
+                    <ul class="text-xs text-slate-600 space-y-1.5 list-disc pl-4">
+                        <li>Participação em Projetos Especiais de SAC</li>
+                        <li>Mentoria individual com Coordenadora Geral</li>
+                        <li>Mapeamento no Banco de Sucessão</li>
+                        <li>Designação como Multiplicador Técnico</li>
+                    </ul>
+                    <div class="border-t border-slate-100 pt-3">
+                        <span class="text-[11px] font-bold text-slate-700 block mb-2">Candidatos a Sucessão Registrados:</span>
+                        <div id="pdi-list-20" class="space-y-1"></div>
+                    </div>
+                </div>
+
+                <!-- Coluna 70% -->
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 border-t-4 border-t-blue-500 space-y-4">
+                    <div class="flex items-center gap-2 text-blue-600 font-bold text-sm">
+                        <i class="fa-solid fa-shield-halved text-lg"></i>
+                        <span>70% - Base Operacional</span>
+                    </div>
+                    <p class="text-xs text-slate-500">Consistência operacional, refinamento técnico e evolução constante.</p>
+                    <ul class="text-xs text-slate-600 space-y-1.5 list-disc pl-4">
+                        <li>Treinamentos técnicos de reciclagem (Sistemas/Processos)</li>
+                        <li>Aperfeiçoamento de indicadores individuais</li>
+                        <li>Feedback mensal estruturado de acompanhamento</li>
+                        <li>Definição de metas incrementais de qualidade</li>
+                    </ul>
+                    <div class="border-t border-slate-100 pt-3">
+                        <span class="text-[11px] font-bold text-slate-700 block mb-2">Acompanhamento Regular:</span>
+                        <div id="pdi-list-70" class="space-y-1"></div>
+                    </div>
+                </div>
+
+                <!-- Coluna 10% -->
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 border-t-4 border-t-amber-500 space-y-4">
+                    <div class="flex items-center gap-2 text-amber-600 font-bold text-sm">
+                        <i class="fa-solid fa-triangle-exclamation text-lg"></i>
+                        <span>10% - Desenvol. Prioritário</span>
+                    </div>
+                    <p class="text-xs text-slate-500">Plano de ação individualizado e acompanhamento intensivo.</p>
+                    <ul class="text-xs text-slate-600 space-y-1.5 list-disc pl-4">
+                        <li>Plano Individual de Desenvolvimento (PDI) quinzenal</li>
+                        <li>Metas objetivas de presença, postura e qualidade</li>
+                        <li>Reciclagem imediata nos pontos fracos identificados</li>
+                        <li>Reavaliação obrigatória em 30/60 dias</li>
+                    </ul>
+                    <div class="border-t border-slate-100 pt-3">
+                        <span class="text-[11px] font-bold text-slate-700 block mb-2">Casos sob Acompanhamento Próximo:</span>
+                        <div id="pdi-list-10" class="space-y-1"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== TELA 6: ASSISTENTE IA ==================== -->
+        <div id="sec-assistente-ia" class="hidden space-y-6">
             <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                <h3 class="text-md font-bold text-slate-800 mb-4 flex items-center gap-2">
-                    <i class="fa-solid fa-user-check text-sky-600"></i> Selecione um Operador para Roteiro de Feedback
-                </h3>
-                <select id="selectAnaliseOp" onchange="renderIndividualAnalysis()" class="w-full md:w-1/2 border border-slate-300 rounded-lg p-2 text-sm outline-none focus:ring-2 focus:ring-sky-500">
-                    <option value="">-- Selecione um Operador --</option>
-                </select>
+                <div class="mb-4">
+                    <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles text-emerald-500"></i> Gerador Inteligente de Roteiro de Feedback & PDI (IA Gemini)
+                    </h2>
+                    <p class="text-xs text-slate-500">Estrutura o roteiro da reunião de feedback e pontos do PDI com base nas notas e evidências do operador.</p>
+                </div>
 
-                <div id="analysisResult" class="mt-6 hidden space-y-6">
-                    <div class="p-4 bg-slate-50 rounded-lg border border-slate-200 grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <span class="text-xs text-slate-500">Colaborador</span>
-                            <div class="font-bold text-slate-800 text-lg" id="anNome">-</div>
-                        </div>
-                        <div>
-                            <span class="text-xs text-slate-500">Classificação Atual</span>
-                            <div id="anGrupo" class="mt-1">-</div>
-                        </div>
-                        <div>
-                            <span class="text-xs text-slate-500">Nota Final Calculada</span>
-                            <div class="font-extrabold text-sky-700 text-lg" id="anNota">-</div>
-                        </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Selecione o Operador</label>
+                        <select id="ia-select-operator" onchange="loadIaOperatorDetails()" class="w-full border border-slate-300 rounded-lg p-2 text-xs outline-none focus:ring-2 focus:ring-sky-500">
+                            <option value="">-- Escolha um operador --</option>
+                        </select>
                     </div>
+                    <div class="flex items-end">
+                        <button onclick="generateIaScript()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-4 rounded-lg text-xs transition flex items-center justify-center gap-2 shadow">
+                            <i class="fa-solid fa-robot"></i> Gerar Roteiro de Feedback com IA
+                        </button>
+                    </div>
+                </div>
 
-                    <!-- Roteiro de Feedback Recomendado -->
-                    <div class="bg-slate-900 text-slate-100 p-6 rounded-xl space-y-3">
-                        <h4 class="font-bold text-amber-400 flex items-center gap-2 text-base">
-                            <i class="fa-solid fa-comments"></i> Diretriz Estratégica & Roteiro de Feedback Recomendado
-                        </h4>
-                        <div id="anRoteiro" class="text-sm leading-relaxed text-slate-300 whitespace-pre-line"></div>
+                <!-- Detalhes do Operador Selecionado -->
+                <div id="ia-details-card" class="hidden bg-slate-50 p-4 rounded-lg border border-slate-200 grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs mb-6">
+                    <div>
+                        <span class="text-slate-400 block">Classificação</span>
+                        <div id="ia-card-grupo" class="font-bold mt-1"></div>
                     </div>
+                    <div>
+                        <span class="text-slate-400 block">Performance (50%)</span>
+                        <div id="ia-card-perf" class="font-bold text-slate-800"></div>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block">Comportamento (25%)</span>
+                        <div id="ia-card-comp" class="font-bold text-slate-800"></div>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block">Potencial (25%)</span>
+                        <div id="ia-card-pot" class="font-bold text-slate-800"></div>
+                    </div>
+                </div>
+
+                <!-- Output do Roteiro Gerado -->
+                <div id="ia-output-container" class="hidden bg-slate-900 text-slate-100 p-6 rounded-xl space-y-4">
+                    <h3 class="text-amber-400 font-bold text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-file-lines"></i> Roteiro Estruturado de Feedback
+                    </h3>
+                    <div id="ia-output-text" class="text-xs leading-relaxed space-y-3 text-slate-300 whitespace-pre-line"></div>
                 </div>
             </div>
         </div>
 
     </main>
 
-    <script>
-        let operators = [];
-        let donutChartInstance = null;
-        let barChartInstance = null;
+    <!-- ==================== MODAL DE CADASTRO / EDIÇÃO ==================== -->
+    <div id="modal-operator" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex justify-center items-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200">
+            <div class="bg-slate-900 text-white p-4 flex justify-between items-center">
+                <h3 class="text-sm font-bold flex items-center gap-2" id="modal-title">
+                    <i class="fa-solid fa-user-plus text-sky-400"></i> Avaliar Novo Colaborador
+                </h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="form-operator" onsubmit="handleFormSubmit(event)" class="p-6 space-y-4 text-xs">
+                <input type="hidden" id="op-id">
+                
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Nome Completo do Operador</label>
+                    <input type="text" id="op-nome" required class="w-full border border-slate-300 rounded-lg p-2 outline-none focus:ring-2 focus:ring-sky-500">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-600 mb-1">Coordenadora / Setor</label>
+                        <input type="text" id="op-coord" required placeholder="Ex: Juliana" class="w-full border border-slate-300 rounded-lg p-2 outline-none focus:ring-2 focus:ring-sky-500">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-600 mb-1">Tempo de Empresa</label>
+                        <input type="text" id="op-tempo" required placeholder="Ex: 3 anos" class="w-full border border-slate-300 rounded-lg p-2 outline-none focus:ring-2 focus:ring-sky-500">
+                    </div>
+                </div>
 
+                <div class="grid grid-cols-3 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-600 mb-1">Performance (0-10)</label>
+                        <input type="number" step="0.1" min="0" max="10" id="op-perf" required class="w-full border border-slate-300 rounded-lg p-2 outline-none focus:ring-2 focus:ring-sky-500">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-600 mb-1">Comportamento (1-5)</label>
+                        <input type="number" step="0.1" min="1" max="5" id="op-comp" required class="w-full border border-slate-300 rounded-lg p-2 outline-none focus:ring-2 focus:ring-sky-500">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-600 mb-1">Potencial (1-5)</label>
+                        <input type="number" step="0.1" min="1" max="5" id="op-pot" required class="w-full border border-slate-300 rounded-lg p-2 outline-none focus:ring-2 focus:ring-sky-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Evidências / Justificativa Validade</label>
+                    <textarea id="op-evid" rows="3" placeholder="Fatos e dados que justificam as notas..." class="w-full border border-slate-300 rounded-lg p-2 outline-none focus:ring-2 focus:ring-sky-500"></textarea>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                    <button type="button" onclick="closeModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold px-4 py-2 rounded-lg transition">Cancelar</button>
+                    <button type="submit" class="bg-sky-600 hover:bg-sky-500 text-white font-semibold px-6 py-2 rounded-lg transition shadow">Salvar Avaliação</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==================== LOGICA JAVASCRIPT INTEGRAL ==================== -->
+    <script>
+        // Dados Iniciais Fidedignos ao PDF
+        const initialOperators = [
+            { id: 'op_1', nome: 'Ana Silva', coord: 'Juliana', tempo: '3 anos', perf: 9.87, comp: 5.0, pot: 5.0, evid: 'Indicadores operacionais irretocáveis. Referência em qualidade e NPS.' },
+            { id: 'op_2', nome: 'Fernanda Costa', coord: 'Diego', tempo: '2 anos', perf: 8.90, comp: 4.4, pot: 4.5, evid: 'Destaque em resolução de chamados complexos com alta taxa de FCR.' },
+            { id: 'op_3', nome: 'Diego Oliveira', coord: 'Juliana', tempo: '3 anos', perf: 10.0, comp: 3.4, pot: 3.8, evid: 'Performance técnica impecável. Apresenta resistência a feedbacks negativos.' },
+            { id: 'op_4', nome: 'Bruno Santos', coord: 'Diego', tempo: '1 ano', perf: 7.50, comp: 4.0, pot: 3.8, evid: 'Entregas dentro da média estabelecida. Ritmo estável.' },
+            { id: 'op_5', nome: 'Carla Mendes', coord: 'Juliana', tempo: '6 meses', perf: 5.00, comp: 2.0, pot: 2.5, evid: 'Dificuldade com metas de TMA e aderência à escala de trabalho.' }
+        ];
+
+        const initialChecklist = [
+            { id: 0, titulo: "ENCONTRO 0 — Alinhamento", desc: "Apresentação dos objetivos da matriz 70/20/10 para as coordenadoras.", status: "Concluído" },
+            { id: 1, titulo: "ENCONTRO 1 — Coleta de Dados", desc: "Levantamento dos indicadores de qualidade e TMA dos últimos 3 meses.", status: "Concluído" },
+            { id: 2, titulo: "ENCONTRO 2 — Validação da Base", desc: "Conferência dos números da equipe entre coordenação técnica e operações.", status: "Concluído" },
+            { id: 3, titulo: "ENCONTRO 3 — Avaliação Comportamental", desc: "Aplicação da régua de comportamento (Engajamento, Resiliência, Trabalho em Equipe).", status: "Em Andamento" },
+            { id: 4, titulo: "ENCONTRO 4 — Avaliação de Potencial", desc: "Avaliação da capacidade de aprendizagem, liderança informal e autonomia.", status: "Pendente" },
+            { id: 5, titulo: "ENCONTRO 5 — Reunião de Calibração", desc: "Ajuste fino com o Comitê de Gestão para eliminar distorções de notas.", status: "Pendente" },
+            { id: 6, titulo: "ENCONTRO 6 — Consolidação da Matriz", desc: "Aprovação final dos percentuais (20%, 70%, 10%) e lista de sucessão.", status: "Pendente" },
+            { id: 7, titulo: "ENCONTRO 7 — Plano de Desenvolvimento (PDI)", desc: "Elaboração dos roteiros de conversa individual e acordos de PDI.", status: "Pendente" }
+        ];
+
+        let operators = [];
+        let checklist = [];
+        let chartDonutInstance = null;
+        let chartScatterInstance = null;
+
+        // Inicialização
         document.addEventListener('DOMContentLoaded', () => {
-            loadFromLocalStorage();
-            render();
+            loadStorage();
+            renderAll();
         });
 
-        // Alternar entre as abas
-        function switchTab(tab) {
-            document.getElementById('section-gestao').classList.add('hidden');
-            document.getElementById('section-dashboards').classList.add('hidden');
-            document.getElementById('section-analises').classList.add('hidden');
+        function loadStorage() {
+            const dataOp = localStorage.getItem('matriz_702010_full_data');
+            operators = dataOp ? JSON.parse(dataOp) : [...initialOperators];
 
-            document.getElementById('tab-gestao').classList.remove('tab-active');
-            document.getElementById('tab-dashboards').classList.remove('tab-active');
-            document.getElementById('tab-analises').classList.remove('tab-active');
-
-            document.getElementById(`section-${tab}`).classList.remove('hidden');
-            document.getElementById(`tab-${tab}`).classList.add('tab-active');
-
-            if (tab === 'dashboards') {
-                renderCharts();
-            } else if (tab === 'analises') {
-                populateAnaliseSelect();
-            }
+            const dataCheck = localStorage.getItem('matriz_checklist_data');
+            checklist = dataCheck ? JSON.parse(dataCheck) : [...initialChecklist];
         }
 
-        // Salvar no LocalStorage
-        function saveToLocalStorage() {
-            localStorage.setItem('matriz_702010_data', JSON.stringify(operators));
-            const alert = document.getElementById('saveAlert');
-            const timeSpan = document.getElementById('lastSaveTime');
-            alert.classList.remove('hidden');
-            timeSpan.innerText = 'Salvo em: ' + new Date().toLocaleTimeString();
-            setTimeout(() => alert.classList.add('hidden'), 3000);
+        function saveStorage() {
+            localStorage.setItem('matriz_702010_full_data', JSON.stringify(operators));
+            localStorage.setItem('matriz_checklist_data', JSON.stringify(checklist));
         }
 
-        // Carregar do LocalStorage
-        function loadFromLocalStorage() {
-            const data = localStorage.getItem('matriz_702010_data');
-            if (data) {
-                try { operators = JSON.parse(data); } catch (e) { operators = []; }
-            }
+        // Cálculo Ponderado da Nota Final
+        function calcNotaFinal(op) {
+            const perfVal = op.perf * 0.50;
+            const compVal = (op.comp * 2) * 0.25;
+            const potVal = (op.pot * 2) * 0.25;
+            return (perfVal + compVal + potVal);
         }
 
-        // Envio do formulário
-        function handleFormSubmit(e) {
-            e.preventDefault();
-            const id = document.getElementById('operatorId').value;
-            const nome = document.getElementById('nome').value.trim();
-            const setor = document.getElementById('setor').value.trim();
-            const performance = parseFloat(document.getElementById('performance').value);
-            const comportamento = parseFloat(document.getElementById('comportamento').value);
-            const potencial = parseFloat(document.getElementById('potencial').value);
-            const evidencias = document.getElementById('evidencias').value.trim();
+        // Processa ranking e grupos 70/20/10
+        function getCalculatedOperators() {
+            const list = operators.map(op => ({
+                ...op,
+                notaFinal: calcNotaFinal(op)
+            })).sort((a, b) => b.notaFinal - a.notaFinal);
 
-            if (id) {
-                const index = operators.findIndex(op => op.id === id);
-                if (index !== -1) operators[index] = { id, nome, setor, performance, comportamento, potencial, evidencias };
-            } else {
-                operators.push({ id: 'op_' + Date.now(), nome, setor, performance, comportamento, potencial, evidencias });
-            }
+            const total = list.length;
+            const cut20 = Math.ceil(total * 0.20);
+            const cut70 = Math.ceil(total * 0.90);
 
-            saveToLocalStorage();
-            resetForm();
-            render();
-        }
-
-        function editOperator(id) {
-            const op = operators.find(o => o.id === id);
-            if (!op) return;
-            document.getElementById('operatorId').value = op.id;
-            document.getElementById('nome').value = op.nome;
-            document.getElementById('setor').value = op.setor;
-            document.getElementById('performance').value = op.performance;
-            document.getElementById('comportamento').value = op.comportamento;
-            document.getElementById('potencial').value = op.potencial;
-            document.getElementById('evidencias').value = op.evidencias || '';
-            switchTab('gestao');
-        }
-
-        function deleteOperator(id) {
-            if (confirm("Deseja realmente remover este operador?")) {
-                operators = operators.filter(o => o.id !== id);
-                saveToLocalStorage();
-                render();
-            }
-        }
-
-        function resetForm() {
-            document.getElementById('operatorForm').reset();
-            document.getElementById('operatorId').value = '';
-        }
-
-        function calculateFinalGrade(op) {
-            return (op.performance * 0.50) + ((op.comportamento * 2) * 0.25) + ((op.potencial * 2) * 0.25);
-        }
-
-        function render() {
-            const tbody = document.getElementById('operatorsTable');
-            tbody.innerHTML = '';
-
-            if (operators.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="text-center p-6 text-slate-400">Nenhum operador cadastrado.</td></tr>`;
-                updateDashboard(0, 0, 0, 0);
-                return;
-            }
-
-            const calculated = operators.map(op => ({ ...op, notaFinal: calculateFinalGrade(op) }))
-                                .sort((a, b) => b.notaFinal - a.notaFinal);
-
-            const total = calculated.length;
-            const cutoff20 = Math.ceil(total * 0.20);
-            const cutoff70 = Math.ceil(total * 0.90);
-
-            let count20 = 0, count70 = 0, count10 = 0;
-
-            calculated.forEach((op, index) => {
-                let grupo = '', badgeClass = '';
-                if (index < cutoff20) {
-                    grupo = '20% - Talentos'; badgeClass = 'badge-20'; count20++;
-                } else if (index < cutoff70) {
-                    grupo = '70% - Base Operacional'; badgeClass = 'badge-70'; count70++;
+            return list.map((op, idx) => {
+                let grupo = '';
+                let badgeClass = '';
+                if (idx < cut20) {
+                    grupo = '20% - Talentos';
+                    badgeClass = 'badge-20';
+                } else if (idx < cut70) {
+                    grupo = '70% - Base Operacional';
+                    badgeClass = 'badge-70';
                 } else {
-                    grupo = '10% - Desenvol. Prioritário'; badgeClass = 'badge-10'; count10++;
+                    grupo = '10% - Desenvol. Prioritário';
+                    badgeClass = 'badge-10';
                 }
+                return { ...op, grupo, badgeClass, rank: idx + 1 };
+            });
+        }
 
+        // Renderização Geral
+        function renderAll() {
+            const list = getCalculatedOperators();
+
+            renderVisaoGeral(list);
+            renderChecklist();
+            renderAvaliacaoTable(list);
+            renderCalibracaoGrid(list);
+            renderPdiColumns(list);
+            populateIaSelect(list);
+        }
+
+        // Navegação de Abas
+        function switchTab(tabId) {
+            ['visao-geral', 'checklist', 'avaliacao', 'calibracao', 'pdi', 'assistente-ia'].forEach(t => {
+                document.getElementById(`sec-${t}`).classList.add('hidden');
+                document.getElementById(`tab-${t}`).classList.remove('nav-tab-active');
+            });
+
+            document.getElementById(`sec-${tabId}`).classList.remove('hidden');
+            document.getElementById(`tab-${tabId}`).classList.add('nav-tab-active');
+
+            if (tabId === 'visao-geral') {
+                renderCharts(getCalculatedOperators());
+            }
+        }
+
+        // Tela 1: Visão Geral
+        function renderVisaoGeral(list) {
+            const total = list.length;
+            const c20 = list.filter(o => o.grupo.includes('20%')).length;
+            const c70 = list.filter(o => o.grupo.includes('70%')).length;
+            const c10 = list.filter(o => o.grupo.includes('10%')).length;
+
+            document.getElementById('kpi-total').innerText = total;
+            document.getElementById('kpi-20').innerText = c20;
+            document.getElementById('kpi-70').innerText = c70;
+            document.getElementById('kpi-10').innerText = c10;
+
+            // Tabela Resumo Rápido
+            const tbody = document.getElementById('table-resumo-body');
+            tbody.innerHTML = '';
+            list.slice(0, 5).forEach(op => {
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-50 transition';
                 tr.innerHTML = `
                     <td class="p-3 font-semibold text-slate-800">${op.nome}</td>
-                    <td class="p-3 text-slate-500">${op.setor}</td>
-                    <td class="p-3 font-medium">${op.performance.toFixed(1)}</td>
-                    <td class="p-3 font-medium">${op.comportamento.toFixed(1)}</td>
-                    <td class="p-3 font-medium">${op.potencial.toFixed(1)}</td>
+                    <td class="p-3 text-slate-500">${op.coord}</td>
+                    <td class="p-3">${op.perf.toFixed(2)}</td>
+                    <td class="p-3">${op.comp.toFixed(2)}</td>
+                    <td class="p-3">${op.pot.toFixed(2)}</td>
                     <td class="p-3 font-bold text-sky-700">${op.notaFinal.toFixed(2)}</td>
-                    <td class="p-3"><span class="px-2.5 py-1 rounded-full text-xs font-bold ${badgeClass}">${grupo}</span></td>
-                    <td class="p-3 text-center space-x-2">
-                        <button onclick="editOperator('${op.id}')" class="text-sky-600 hover:text-sky-800" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button>
-                        <button onclick="deleteOperator('${op.id}')" class="text-rose-600 hover:text-rose-800" title="Excluir"><i class="fa-solid fa-trash"></i></button>
-                    </td>
+                    <td class="p-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${op.badgeClass}">${op.grupo}</span></td>
+                    <td class="p-3 text-emerald-600 font-semibold"><i class="fa-solid fa-check"></i> Sim</td>
                 `;
                 tbody.appendChild(tr);
             });
 
-            updateDashboard(total, count20, count70, count10);
+            renderCharts(list);
         }
 
-        function updateDashboard(total, c20, c70, c10) {
-            document.getElementById('totalCount').innerText = total;
-            document.getElementById('count20').innerText = `${c20} `;
-            document.getElementById('pct20').innerText = total > 0 ? `(${((c20/total)*100).toFixed(0)}%)` : '(0%)';
-            document.getElementById('count70').innerText = `${c70} `;
-            document.getElementById('pct70').innerText = total > 0 ? `(${((c70/total)*100).toFixed(0)}%)` : '(0%)';
-            document.getElementById('count10').innerText = `${c10} `;
-            document.getElementById('pct10').innerText = total > 0 ? `(${((c10/total)*100).toFixed(0)}%)` : '(0%)';
-        }
+        function renderCharts(list) {
+            if (chartDonutInstance) chartDonutInstance.destroy();
+            if (chartScatterInstance) chartScatterInstance.destroy();
 
-        // Renderização dos Gráficos na Aba de Visão Geral
-        function renderCharts() {
-            if (donutChartInstance) donutChartInstance.destroy();
-            if (barChartInstance) barChartInstance.destroy();
+            const c20 = list.filter(o => o.grupo.includes('20%')).length;
+            const c70 = list.filter(o => o.grupo.includes('70%')).length;
+            const c10 = list.filter(o => o.grupo.includes('10%')).length;
 
-            const calculated = operators.map(op => ({ ...op, notaFinal: calculateFinalGrade(op) }))
-                                .sort((a, b) => b.notaFinal - a.notaFinal);
-
-            const total = calculated.length;
-            const cutoff20 = Math.ceil(total * 0.20);
-            const cutoff70 = Math.ceil(total * 0.90);
-
-            let c20 = 0, c70 = 0, c10 = 0;
-            calculated.forEach((op, idx) => {
-                if (idx < cutoff20) c20++;
-                else if (idx < cutoff70) c70++;
-                else c10++;
-            });
-
-            // Gráfico de Rosca
-            const ctxDonut = document.getElementById('donutChart').getContext('2d');
-            donutChartInstance = new Chart(ctxDonut, {
+            // Donut Chart
+            const ctxDonut = document.getElementById('chartDonut').getContext('2d');
+            chartDonutInstance = new Chart(ctxDonut, {
                 type: 'doughnut',
                 data: {
-                    labels: ['20% Talentos', '70% Base Operacional', '10% Desenvol. Prioritário'],
+                    labels: ['20% Talentos', '70% Base Operacional', '10% Prioritário'],
                     datasets: [{
                         data: [c20, c70, c10],
                         backgroundColor: ['#10B981', '#3B82F6', '#F59E0B']
@@ -412,110 +630,288 @@
                 options: { responsive: true, maintainAspectRatio: false }
             });
 
-            // Gráfico de Barras
-            const ctxBar = document.getElementById('barChart').getContext('2d');
-            barChartInstance = new Chart(ctxBar, {
-                type: 'bar',
+            // Scatter Plot (Performance vs Potencial)
+            const ctxScatter = document.getElementById('chartScatter').getContext('2d');
+            chartScatterInstance = new Chart(ctxScatter, {
+                type: 'scatter',
                 data: {
-                    labels: calculated.map(o => o.nome),
                     datasets: [{
-                        label: 'Nota Final',
-                        data: calculated.map(o => o.notaFinal.toFixed(2)),
+                        label: 'Operadores',
+                        data: list.map(o => ({ x: o.perf, y: o.pot * 2, label: o.nome })),
                         backgroundColor: '#0EA5E9'
                     }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 10 } } }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { title: { display: true, text: 'Performance (0-10)' }, min: 0, max: 10 },
+                        y: { title: { display: true, text: 'Potencial (1-10)' }, min: 0, max: 10 }
+                    }
+                }
             });
         }
 
-        // Análise Individual e Roteiros
-        function populateAnaliseSelect() {
-            const select = document.getElementById('selectAnaliseOp');
-            select.innerHTML = '<option value="">-- Selecione um Operador --</option>';
-            operators.forEach(op => {
+        // Tela 2: Checklist
+        function renderChecklist() {
+            const container = document.getElementById('checklist-list');
+            container.innerHTML = '';
+
+            let completed = 0;
+            checklist.forEach(item => {
+                if (item.status === 'Concluído') completed++;
+
+                const div = document.createElement('div');
+                div.className = 'p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3';
+                div.innerHTML = `
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h4 class="font-bold text-xs text-slate-800">${item.titulo}</h4>
+                            <span class="text-[10px] px-2 py-0.5 rounded font-semibold ${item.status === 'Concluído' ? 'bg-emerald-100 text-emerald-800' : (item.status === 'Em Andamento' ? 'bg-sky-100 text-sky-800' : 'bg-slate-200 text-slate-600')}">${item.status}</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500 mt-1">${item.desc}</p>
+                    </div>
+                    <select onchange="updateChecklistStatus(${item.id}, this.value)" class="border border-slate-300 rounded-lg p-1.5 text-xs font-semibold outline-none bg-white">
+                        <option value="Pendente" ${item.status === 'Pendente' ? 'selected' : ''}>Pendente</option>
+                        <option value="Em Andamento" ${item.status === 'Em Andamento' ? 'selected' : ''}>Em Andamento</option>
+                        <option value="Concluído" ${item.status === 'Concluído' ? 'selected' : ''}>Concluído</option>
+                    </select>
+                `;
+                container.appendChild(div);
+            });
+
+            const pct = Math.round((completed / checklist.length) * 100);
+            document.getElementById('checklist-progress-text').innerText = `${pct}%`;
+            document.getElementById('checklist-progress-bar').style.width = `${pct}%`;
+        }
+
+        function updateChecklistStatus(id, newStatus) {
+            const idx = checklist.findIndex(c => c.id === id);
+            if (idx !== -1) {
+                checklist[idx].status = newStatus;
+                saveStorage();
+                renderChecklist();
+            }
+        }
+
+        // Tela 3: Avaliação Tabela
+        function renderAvaliacaoTable(customList) {
+            const list = customList || getCalculatedOperators();
+            const groupFilter = document.getElementById('filter-group').value;
+            const searchFilter = document.getElementById('filter-search').value.toLowerCase();
+
+            const tbody = document.getElementById('table-avaliacao-body');
+            tbody.innerHTML = '';
+
+            const filtered = list.filter(op => {
+                const matchGroup = groupFilter === 'ALL' || op.grupo.includes(groupFilter);
+                const matchSearch = op.nome.toLowerCase().includes(searchFilter) || op.coord.toLowerCase().includes(searchFilter);
+                return matchGroup && matchSearch;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" class="p-4 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach(op => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition border-b border-slate-100';
+                tr.innerHTML = `
+                    <td class="p-3">
+                        <div class="font-bold text-slate-800">${op.nome}</div>
+                        <div class="text-[10px] text-slate-400">Coord: ${op.coord}</div>
+                    </td>
+                    <td class="p-3 text-slate-500">${op.tempo}</td>
+                    <td class="p-3 font-semibold">${op.perf.toFixed(2)}</td>
+                    <td class="p-3 font-semibold">${op.comp.toFixed(2)}</td>
+                    <td class="p-3 font-semibold">${op.pot.toFixed(2)}</td>
+                    <td class="p-3 font-extrabold text-sky-700">${op.notaFinal.toFixed(2)}</td>
+                    <td class="p-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${op.badgeClass}">${op.grupo}</span></td>
+                    <td class="p-3 text-slate-500 max-w-xs truncate" title="${op.evid}">${op.evid || 'Validadas em ata'}</td>
+                    <td class="p-3 text-center space-x-2">
+                        <button onclick="editOperator('${op.id}')" class="text-sky-600 hover:text-sky-800"><i class="fa-solid fa-pen-to-square"></i></button>
+                        <button onclick="deleteOperator('${op.id}')" class="text-rose-600 hover:text-rose-800"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Tela 4: Calibração 9-Box
+        function renderCalibracaoGrid(list) {
+            for (let i = 1; i <= 9; i++) {
+                document.getElementById(`box-${i}`).innerHTML = '';
+            }
+
+            list.forEach(op => {
+                let boxNum = 5; // padrão médio
+                if (op.pot >= 4) {
+                    if (op.perf >= 8.5) boxNum = 3;
+                    else if (op.perf >= 6) boxNum = 2;
+                    else boxNum = 1;
+                } else if (op.pot >= 2.5) {
+                    if (op.perf >= 8.5) boxNum = 6;
+                    else if (op.perf >= 6) boxNum = 5;
+                    else boxNum = 4;
+                } else {
+                    if (op.perf >= 8.5) boxNum = 9;
+                    else if (op.perf >= 6) boxNum = 8;
+                    else boxNum = 7;
+                }
+
+                const tag = document.createElement('div');
+                tag.className = 'bg-white px-2 py-1 rounded shadow-sm border border-slate-200 text-[11px] font-bold text-slate-800 flex justify-between items-center';
+                tag.innerHTML = `<span>${op.nome}</span> <span class="text-[9px] text-sky-600">(${op.notaFinal.toFixed(1)})</span>`;
+                document.getElementById(`box-${boxNum}`).appendChild(tag);
+            });
+        }
+
+        // Tela 5: PDI Columns
+        function renderPdiColumns(list) {
+            const div20 = document.getElementById('pdi-list-20');
+            const div70 = document.getElementById('pdi-list-70');
+            const div10 = document.getElementById('pdi-list-10');
+
+            div20.innerHTML = ''; div70.innerHTML = ''; div10.innerHTML = '';
+
+            list.forEach(op => {
+                const item = document.createElement('div');
+                item.className = 'p-2 rounded bg-slate-50 border border-slate-200 text-xs font-semibold flex justify-between items-center';
+                item.innerHTML = `<span>${op.nome} (${op.coord})</span> <span class="text-slate-500 font-bold">${op.notaFinal.toFixed(2)}</span>`;
+
+                if (op.grupo.includes('20%')) div20.appendChild(item);
+                else if (op.grupo.includes('70%')) div70.appendChild(item);
+                else div10.appendChild(item);
+            });
+        }
+
+        // Tela 6: Assistente IA
+        function populateIaSelect(list) {
+            const select = document.getElementById('ia-select-operator');
+            select.innerHTML = '<option value="">-- Escolha um operador --</option>';
+            list.forEach(op => {
                 const opt = document.createElement('option');
                 opt.value = op.id;
-                opt.innerText = op.nome;
+                opt.innerText = `${op.nome} (${op.coord}) - Nota ${op.notaFinal.toFixed(2)}`;
                 select.appendChild(opt);
             });
         }
 
-        function renderIndividualAnalysis() {
-            const id = document.getElementById('selectAnaliseOp').value;
-            const resultDiv = document.getElementById('analysisResult');
-            if (!id) { resultDiv.classList.add('hidden'); return; }
+        function loadIaOperatorDetails() {
+            const id = document.getElementById('ia-select-operator').value;
+            const card = document.getElementById('ia-details-card');
+            if (!id) { card.classList.add('hidden'); return; }
 
-            const calculated = operators.map(op => ({ ...op, notaFinal: calculateFinalGrade(op) }))
-                                .sort((a, b) => b.notaFinal - a.notaFinal);
+            const list = getCalculatedOperators();
+            const op = list.find(o => o.id === id);
 
-            const total = calculated.length;
-            const index = calculated.findIndex(o => o.id === id);
-            const op = calculated[index];
+            document.getElementById('ia-card-grupo').innerHTML = `<span class="px-2 py-0.5 rounded text-[10px] ${op.badgeClass}">${op.grupo}</span>`;
+            document.getElementById('ia-card-perf').innerText = op.perf.toFixed(2);
+            document.getElementById('ia-card-comp').innerText = op.comp.toFixed(2);
+            document.getElementById('ia-card-pot').innerText = op.pot.toFixed(2);
 
-            const cutoff20 = Math.ceil(total * 0.20);
-            const cutoff70 = Math.ceil(total * 0.90);
+            card.classList.remove('hidden');
+        }
 
-            let grupo = '', badgeClass = '', roteiro = '';
+        function generateIaScript() {
+            const id = document.getElementById('ia-select-operator').value;
+            if (!id) { alert("Selecione um operador primeiro!"); return; }
 
-            if (index < cutoff20) {
-                grupo = '20% - Talentos / High Performers';
-                badgeClass = 'badge-20';
-                roteiro = `• Reconhecimento de Resultados: Elogiar publicamente a consistência nos indicadores de SAC e postura comportamental.\n• Plano de Retenção e Desafio: Designar para projetos especiais, apadrinhamento de novos operadores ou treinamento para posições de liderança/monitoria.\n• Foco da Conversa: Manter o engajamento e definir próximos passos de carreira.`;
-            } else if (index < cutoff70) {
-                grupo = '70% - Base Operacional Sólida';
-                badgeClass = 'badge-70';
-                roteiro = `• Reconhecimento da Estabilidade: Valorizar o cumprimento contínuo das metas da operação.\n• Plano de Desenvolvimento Continuo: Identificar pontos específicos de melhoria em qualidade ou produtividade para buscar evolução para o grupo dos 20%.\n• Foco da Conversa: Manter a consistência, prevenir acomodação e incentivar a melhoria contínua.`;
+            const list = getCalculatedOperators();
+            const op = list.find(o => o.id === id);
+
+            const outputContainer = document.getElementById('ia-output-container');
+            const outputText = document.getElementById('ia-output-text');
+
+            let script = `Aqui está o roteiro estruturado para a reunião de desenvolvimento do ${op.nome}, desenhado para maximizar a performance na operação de SAC:\n\n`;
+            script += `1. Abertura e Alinhamento do Objetivo\n"Olá ${op.nome}. É um prazer estarmos aqui hoje. Reservamos este momento para falar diretamente sobre a sua trajetória e o seu futuro na operação com a coordenação de ${op.coord}. Sua nota atual na matriz consolidada é ${op.notaFinal.toFixed(2)}."\n\n`;
+            script += `2. Reconhecimento dos Pontos Fortes e Evidências\n"A sua entrega operacional demonstra aspectos positivos claros: ${op.evid || 'Consistência nos indicadores centrais de SAC'}. Suas notas em Performance (${op.perf}) e Comportamento (${op.comp}) embasam este reconhecimento."\n\n`;
+            
+            if (op.grupo.includes('20%')) {
+                script += `3. Oportunidades de Aceleração & Sucessão\n"Para o seu grupo de 20% Talentos, nosso foco é expansão e liderança técnica. Vamos incluí-lo no apadrinhamento de novos operadores e em projetos estratégicos do setor."\n\n`;
+            } else if (op.grupo.includes('70%')) {
+                script += `3. Oportunidades de Desenvolvimento\n"Como parte fundamental da base 70%, o objetivo é a consistência contínua. Vamos trabalhar o refinamento dos pontos de Potencial (${op.pot}) para preparar seu próximo nível."\n\n`;
             } else {
-                grupo = '10% - Desenvolvimento Prioritário';
-                badgeClass = 'badge-10';
-                roteiro = `• Alinhamento Claro de Expectativas: Apresentar de forma transparente os pontos em que os indicadores estão abaixo do esperado.\n• Plano de Ação Imediato (PDI): Estabelecer metas semanais claras de reciclagem em processos, qualidade e postura.\n• Foco da Conversa: Acompanhamento próximo (1-on-1s quinzenais) para reversão do quadro no curto prazo.`;
+                script += `3. Plano de Ajuste Imediato (PDI 10%)\n"Precisamos alinhar expectativas de forma transparente. Definiremos metas quinzenais para reverter rapidamente as lacunas atuais com suporte próximo da coordenação."\n\n`;
             }
 
-            document.getElementById('anNome').innerText = op.nome;
-            document.getElementById('anGrupo').innerHTML = `<span class="px-2.5 py-1 rounded-full text-xs font-bold ${badgeClass}">${grupo}</span>`;
-            document.getElementById('anNota').innerText = op.notaFinal.toFixed(2);
-            document.getElementById('anRoteiro').innerText = roteiro;
+            script += `4. Compromisso Conjunto (PDI)\n"Definiremos 2 ações práticas para os próximos 30 dias para acompanhamento no Encontro 7 de PDI."`;
 
-            resultDiv.classList.remove('hidden');
+            outputText.innerText = script;
+            outputContainer.classList.remove('hidden');
         }
 
-        // Funções de Importação / Exportação
-        function exportData() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(operators, null, 2));
-            const dlAnchor = document.createElement('a');
-            dlAnchor.setAttribute("href", dataStr);
-            dlAnchor.setAttribute("download", `backup_matriz_${new Date().toISOString().slice(0,10)}.json`);
-            document.body.appendChild(dlAnchor);
-            dlAnchor.click();
-            dlAnchor.remove();
+        // Modal de Cadastro/Edição
+        function openModal() {
+            document.getElementById('form-operator').reset();
+            document.getElementById('op-id').value = '';
+            document.getElementById('modal-title').innerText = "Avaliar Novo Colaborador";
+            document.getElementById('modal-operator').classList.remove('hidden');
         }
 
-        function importData(e) {
-            const fileReader = new FileReader();
-            fileReader.onload = function(event) {
-                try {
-                    const imported = JSON.parse(event.target.result);
-                    if (Array.isArray(imported)) {
-                        operators = imported;
-                        saveToLocalStorage();
-                        render();
-                        alert("Backup carregado com sucesso!");
-                    }
-                } catch (err) { alert("Erro ao ler o ficheiro JSON."); }
-            };
-            if (e.target.files[0]) fileReader.readAsText(e.target.files[0]);
+        function closeModal() {
+            document.getElementById('modal-operator').classList.add('hidden');
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('op-id').value;
+            const nome = document.getElementById('op-nome').value.trim();
+            const coord = document.getElementById('op-coord').value.trim();
+            const tempo = document.getElementById('op-tempo').value.trim();
+            const perf = parseFloat(document.getElementById('op-perf').value);
+            const comp = parseFloat(document.getElementById('op-comp').value);
+            const pot = parseFloat(document.getElementById('op-pot').value);
+            const evid = document.getElementById('op-evid').value.trim();
+
+            if (id) {
+                const idx = operators.findIndex(o => o.id === id);
+                if (idx !== -1) operators[idx] = { id, nome, coord, tempo, perf, comp, pot, evid };
+            } else {
+                operators.push({ id: 'op_' + Date.now(), nome, coord, tempo, perf, comp, pot, evid });
+            }
+
+            saveStorage();
+            closeModal();
+            renderAll();
+        }
+
+        function editOperator(id) {
+            const op = operators.find(o => o.id === id);
+            if (!op) return;
+
+            document.getElementById('op-id').value = op.id;
+            document.getElementById('op-nome').value = op.nome;
+            document.getElementById('op-coord').value = op.coord;
+            document.getElementById('op-tempo').value = op.tempo;
+            document.getElementById('op-perf').value = op.perf;
+            document.getElementById('op-comp').value = op.comp;
+            document.getElementById('op-pot').value = op.pot;
+            document.getElementById('op-evid').value = op.evid;
+
+            document.getElementById('modal-title').innerText = "Editar Avaliação do Colaborador";
+            document.getElementById('modal-operator').classList.remove('hidden');
+        }
+
+        function deleteOperator(id) {
+            if (confirm("Deseja realmente excluir este operador da matriz?")) {
+                operators = operators.filter(o => o.id !== id);
+                saveStorage();
+                renderAll();
+            }
         }
 
         function exportToCSV() {
-            if (operators.length === 0) { alert("Sem dados para exportar."); return; }
-            let csv = "Nome,Setor,Performance,Comportamento,Potencial,Nota_Final,Evidencias\n";
-            operators.forEach(op => {
-                csv += `"${op.nome}","${op.setor}",${op.performance},${op.comportamento},${op.potencial},${calculateFinalGrade(op).toFixed(2)},"${op.evidencias || ''}"\n`;
+            const list = getCalculatedOperators();
+            let csv = "Operador,Coordenadora,Tempo_Empresa,Performance,Comportamento,Potencial,Nota_Final,Grupo_702010,Evidencias\n";
+            list.forEach(op => {
+                csv += `"${op.nome}","${op.coord}","${op.tempo}",${op.perf},${op.comp},${op.pot},${op.notaFinal.toFixed(2)},"${op.grupo}","${op.evid || ''}"\n`;
             });
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.download = `matriz_702010_${new Date().toISOString().slice(0,10)}.csv`;
+            link.download = `matriz_702010_consolidada_${new Date().toISOString().slice(0,10)}.csv`;
             link.click();
         }
     </script>
