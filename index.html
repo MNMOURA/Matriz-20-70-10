@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 
 export default function AvaliacaoOperador() {
-  // Estados para simular a mudança de cores nos indicadores (Positivo > 7, Mediano 5-7, Negativo < 5)
-  const [notaPerf] = useState(8.3); // Positivo -> Verde
-  const [notaComp] = useState(6.0); // Mediano -> Amarelo
-  const [notaPot] = useState(4.0);  // Negativo -> Vermelho (exemplo para mostrar a cor)
+  // Estados para controle de notas e cores dos indicadores
+  const [notaPerf] = useState(8.3); // Positivo (≥ 7.5) -> Verde
+  const [notaComp] = useState(6.0); // Mediano (5.0 a 7.4) -> Amarelo
+  const [notaPot] = useState(4.0);  // Negativo (< 5.0) -> Vermelho
 
   const getIndicatorColor = (nota) => {
     if (nota >= 7.5) return 'bg-green-100 text-green-700 border-green-200';
@@ -30,11 +30,11 @@ export default function AvaliacaoOperador() {
         {/* Form Body */}
         <div className="p-6 space-y-6">
           
-          {/* Top Info */}
+          {/* Informações Iniciais */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-semibold text-[#0f172a] mb-1">Nome do Operador *</label>
-              <input type="text" className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" />
+              <input type="text" className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 outline-none" />
             </div>
             <div>
               <label className="block text-sm font-semibold text-[#0f172a] mb-1">Coordenadora *</label>
@@ -46,7 +46,7 @@ export default function AvaliacaoOperador() {
             </div>
           </div>
 
-          {/* Section 1: Performance */}
+          {/* Bloco 1: Performance */}
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-5">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-md font-bold text-[#0f172a] flex items-center gap-2">
@@ -72,7 +72,7 @@ export default function AvaliacaoOperador() {
             </div>
           </div>
 
-          {/* Section 2: Comportamento */}
+          {/* Bloco 2: Comportamento */}
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-5">
             <div className="flex justify-between items-center mb-2">
               <h3 className="text-md font-bold text-[#0f172a] flex items-center gap-2">
@@ -98,7 +98,7 @@ export default function AvaliacaoOperador() {
             </div>
           </div>
 
-          {/* Section 3: Potencial */}
+          {/* Bloco 3: Potencial */}
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-5">
             <div className="flex justify-between items-center mb-2">
               <h3 className="text-md font-bold text-[#0f172a] flex items-center gap-2">
@@ -124,7 +124,7 @@ export default function AvaliacaoOperador() {
             </div>
           </div>
 
-          {/* Evidências */}
+          {/* Campo de Evidências */}
           <div>
             <label className="block text-sm font-semibold text-[#0f172a] mb-1">
               Evidências e Fatos Observados <span className="text-red-500">* (Obrigatório para notas 1 ou 5)</span>
@@ -136,7 +136,7 @@ export default function AvaliacaoOperador() {
             ></textarea>
           </div>
 
-          {/* Cálculo Final - Azul Marinho com destaques em Amarelo e Branco */}
+          {/* Cálculo Final - Tema Azul Marinho e Amarelo */}
           <div className="bg-[#0f172a] rounded-lg p-5 flex flex-col md:flex-row justify-between items-center shadow-inner">
             <div className="mb-2 md:mb-0">
               <span className="block text-xs font-semibold text-gray-300 tracking-wider">CÁLCULO NOTA FINAL</span>
@@ -150,7 +150,7 @@ export default function AvaliacaoOperador() {
 
         </div>
 
-        {/* Footer Actions */}
+        {/* Botoes de Ação */}
         <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-3 rounded-b-xl">
           <button className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 font-medium transition-colors">
             Cancelar
