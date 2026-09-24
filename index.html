@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matriz de Desenvolvimento e Talentos - 70/20/10</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .badge-20 { background-color: #10B981; color: white; }
+        .badge-70 { background-color: #3B82F6; color: white; }
+        .badge-10 { background-color: #F59E0B; color: white; }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800 font-sans">
+
+    <!-- Header -->
+    <header class="bg-slate-900 text-white shadow-lg border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-chart-line text-emerald-400"></i>
+                    Matriz de Desenvolvimento e Talentos 70/20/10
+                </h1>
+                <p class="text-xs text-slate-400 mt-1">Gestão de SAC • Avaliação de Performance (50%), Comportamento (25%) e Potencial (25%)</p>
+            </div>
+            
+            <!-- Ações de Dados / Persistência -->
+            <div class="flex flex-wrap items-center gap-2">
+                <button onclick="exportData()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-download text-emerald-400"></i> Exportar Backup (JSON)
+                </button>
+                <label class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition">
+                    <i class="fa-solid fa-upload text-sky-400"></i> Importar Backup
+                    <input type="file" id="importFile" onchange="importData(event)" class="hidden" accept=".json">
+                </label>
+                <button onclick="exportToCSV()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition shadow">
+                    <i class="fa-solid fa-file-csv"></i> Baixar CSV
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 space-y-8">
+
+        <!-- Status de Armazenamento -->
+        <div id="saveAlert" class="hidden bg-emerald-100 border border-emerald-400 text-emerald-800 px-4 py-2 rounded-lg text-xs flex justify-between items-center">
+            <span><i class="fa-solid fa-circle-check mr-2"></i> Alterações salvas no navegador com sucesso!</span>
+            <span class="text-slate-500 text-[10px]" id="lastSaveTime"></span>
+        </div>
+
+        <!-- Dashboard Sintético -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                <span class="text-xs font-semibold text-slate-500 uppercase">Total Avaliados</span>
+                <div class="text-3xl font-extrabold text-slate-800 mt-1" id="totalCount">0</div>
+            </div>
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-emerald-500">
+                <span class="text-xs font-semibold text-emerald-600 uppercase">20% Talentos</span>
+                <div class="text-3xl font-extrabold text-slate-800 mt-1" id="count20">0 <span class="text-xs font-normal text-slate-400" id="pct20">(0%)</span></div>
+            </div>
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-blue-500">
+                <span class="text-xs font-semibold text-blue-600 uppercase">70% Base Operacional</span>
+                <div class="text-3xl font-extrabold text-slate-800 mt-1" id="count70">0 <span class="text-xs font-normal text-slate-400" id="pct70">(0%)</span></div>
+            </div>
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-amber-500">
+                <span class="text-xs font-semibold text-amber-600 uppercase">10% Desenvol. Prioritário</span>
+                <div class="text-3xl font-extrabold text-slate-800 mt-1" id="count10">0 <span class="text-xs font-normal text-slate-400" id="pct10">(0%)</span></div>
+            </div>
+        </div>
+
+        <!-- Formulário de Inclusão / Edição -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4">
+            <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-user-plus text-sky-600"></i> Registrar / Avaliar Operador
+            </h2>
+            <form id="operatorForm" onsubmit="handleFormSubmit(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <input type="hidden" id="operatorId">
+                
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Nome Completo</label>
+                    <input type="text" id="nome" required class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-sky-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Setor / Operação SAC</label>
+                    <input type="text" id="setor" required placeholder="Ex: SAC Receptivo" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-sky-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Performance (0 a 10) - Peso 50%</label>
+                    <input type="number" step="0.1" min="0" max="10" id="performance" required class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-sky-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Comportamento (1 a 5) - Peso 25%</label>
+                    <input type="number" step="0.1" min="1" max="5" id="comportamento" required class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-sky-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Potencial (1 a 5) - Peso 25%</label>
+                    <input type="number" step="0.1" min="1" max="5" id="potencial" required class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-sky-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Evidências / Justificativa</label>
+                    <input type="text" id="evidencias" placeholder="Exemplos concretos de fatos/dados" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-sky-500 outline-none">
+                </div>
+
+                <div class="md:col-span-3 flex justify-end gap-2 mt-2">
+                    <button type="button" onclick="resetForm()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm font-semibold transition">Limpar</button>
+                    <button type="submit" class="bg-sky-600 hover:bg-sky-500 text-white px-6 py-2 rounded-lg text-sm font-semibold transition shadow">Salvar Operador</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tabela de Registros -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-4 border-b border-slate-100 flex justify-between items-center">
+                <h3 class="font-bold text-slate-800">Operadores Avaliados</h3>
+                <span class="text-xs text-slate-400">Cálculo Automático: (Perf × 50%) + (Comp × 2,5 × 25%) + (Pot × 2,5 × 25%)</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-sm">
+                    <thead>
+                        <tr class="bg-slate-50 text-slate-500 text-xs font-semibold uppercase">
+                            <th class="p-3 border-b">Nome</th>
+                            <th class="p-3 border-b">Setor</th>
+                            <th class="p-3 border-b">Performance (50%)</th>
+                            <th class="p-3 border-b">Comportamento (25%)</th>
+                            <th class="p-3 border-b">Potencial (25%)</th>
+                            <th class="p-3 border-b">Nota Final</th>
+                            <th class="p-3 border-b">Grupo 70/20/10</th>
+                            <th class="p-3 border-b text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="operatorsTable" class="divide-y divide-slate-100 text-slate-700">
+                        <!-- Conteúdo dinâmico -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Array global de operadores
+        let operators = [];
+
+        // Inicialização: carrega dados salvos no localStorage
+        document.addEventListener('DOMContentLoaded', () => {
+            loadFromLocalStorage();
+            render();
+        });
+
+        // Função de Salvamento no LocalStorage
+        function saveToLocalStorage() {
+            localStorage.setItem('matriz_702010_data', JSON.stringify(operators));
+            
+            // Exibe notificação de salvo
+            const alert = document.getElementById('saveAlert');
+            const timeSpan = document.getElementById('lastSaveTime');
+            alert.classList.remove('hidden');
+            timeSpan.innerText = 'Salvo em: ' + new Date().toLocaleTimeString();
+            
+            setTimeout(() => {
+                alert.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Função de Carregamento do LocalStorage
+        function loadFromLocalStorage() {
+            const data = localStorage.getItem('matriz_702010_data');
+            if (data) {
+                try {
+                    operators = JSON.parse(data);
+                } catch (e) {
+                    console.error("Erro ao carregar dados do localStorage:", e);
+                    operators = [];
+                }
+            }
+        }
+
+        // Submissão do formulário
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('operatorId').value;
+            const nome = document.getElementById('nome').value.trim();
+            const setor = document.getElementById('setor').value.trim();
+            const performance = parseFloat(document.getElementById('performance').value);
+            const comportamento = parseFloat(document.getElementById('comportamento').value);
+            const potencial = parseFloat(document.getElementById('potencial').value);
+            const evidencias = document.getElementById('evidencias').value.trim();
+
+            if (id) {
+                // Editar existente
+                const index = operators.findIndex(op => op.id === id);
+                if (index !== -1) {
+                    operators[index] = { id, nome, setor, performance, comportamento, potencial, evidencias };
+                }
+            } else {
+                // Novo registro
+                const newOp = {
+                    id: 'op_' + Date.now(),
+                    nome,
+                    setor,
+                    performance,
+                    comportamento,
+                    potencial,
+                    evidencias
+                };
+                operators.push(newOp);
+            }
+
+            saveToLocalStorage();
+            resetForm();
+            render();
+        }
+
+        // Edição de Operador
+        function editOperator(id) {
+            const op = operators.find(o => o.id === id);
+            if (!op) return;
+
+            document.getElementById('operatorId').value = op.id;
+            document.getElementById('nome').value = op.nome;
+            document.getElementById('setor').value = op.setor;
+            document.getElementById('performance').value = op.performance;
+            document.getElementById('comportamento').value = op.comportamento;
+            document.getElementById('potencial').value = op.potencial;
+            document.getElementById('evidencias').value = op.evidencias || '';
+        }
+
+        // Exclusão de Operador
+        function deleteOperator(id) {
+            if (confirm("Deseja realmente remover este colaborador da matriz?")) {
+                operators = operators.filter(o => o.id !== id);
+                saveToLocalStorage();
+                render();
+            }
+        }
+
+        // Limpar Formulário
+        function resetForm() {
+            document.getElementById('operatorForm').reset();
+            document.getElementById('operatorId').value = '';
+        }
+
+        // Cálculo da Nota Ponderada (Convertendo escala 1-5 de comportamento/potencial para base 10)
+        function calculateFinalGrade(op) {
+            const perfPart = op.performance * 0.50;
+            const compPart = (op.comportamento * 2) * 0.25;
+            const potPart = (op.potencial * 2) * 0.25;
+            return (perfPart + compPart + potPart);
+        }
+
+        // Classificação e Renderização
+        function render() {
+            const tbody = document.getElementById('operatorsTable');
+            tbody.innerHTML = '';
+
+            if (operators.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center p-6 text-slate-400">Nenhum operador cadastrado no momento.</td></tr>`;
+                updateDashboard(0, 0, 0, 0);
+                return;
+            }
+
+            // Ordena os operadores pela Nota Final decrescente
+            const calculated = operators.map(op => ({
+                ...op,
+                notaFinal: calculateFinalGrade(op)
+            })).sort((a, b) => b.notaFinal - a.notaFinal);
+
+            const total = calculated.length;
+            
+            // Define os cortes baseados nos percentuais 20% e 70%
+            const cutoff20 = Math.ceil(total * 0.20);
+            const cutoff70 = Math.ceil(total * 0.90);
+
+            let count20 = 0, count70 = 0, count10 = 0;
+
+            calculated.forEach((op, index) => {
+                let grupo = '';
+                let badgeClass = '';
+
+                if (index < cutoff20) {
+                    grupo = '20% - Talentos';
+                    badgeClass = 'badge-20';
+                    count20++;
+                } else if (index < cutoff70) {
+                    grupo = '70% - Base Operacional';
+                    badgeClass = 'badge-70';
+                    count70++;
+                } else {
+                    grupo = '10% - Desenvol. Prioritário';
+                    badgeClass = 'badge-10';
+                    count10++;
+                }
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition';
+                tr.innerHTML = `
+                    <td class="p-3 font-semibold text-slate-800">${op.nome}</td>
+                    <td class="p-3 text-slate-500">${op.setor}</td>
+                    <td class="p-3 font-medium">${op.performance.toFixed(1)}</td>
+                    <td class="p-3 font-medium">${op.comportamento.toFixed(1)}</td>
+                    <td class="p-3 font-medium">${op.potencial.toFixed(1)}</td>
+                    <td class="p-3 font-bold text-sky-700">${op.notaFinal.toFixed(2)}</td>
+                    <td class="p-3"><span class="px-2.5 py-1 rounded-full text-xs font-bold ${badgeClass}">${grupo}</span></td>
+                    <td class="p-3 text-center space-x-2">
+                        <button onclick="editOperator('${op.id}')" class="text-sky-600 hover:text-sky-800 p-1" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button>
+                        <button onclick="deleteOperator('${op.id}')" class="text-rose-600 hover:text-rose-800 p-1" title="Excluir"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            updateDashboard(total, count20, count70, count10);
+        }
+
+        // Atualização dos cards sintéticos
+        function updateDashboard(total, c20, c70, c10) {
+            document.getElementById('totalCount').innerText = total;
+            document.getElementById('count20').innerText = `${c20} `;
+            document.getElementById('pct20').innerText = total > 0 ? `(${((c20/total)*100).toFixed(0)}%)` : '(0%)';
+            
+            document.getElementById('count70').innerText = `${c70} `;
+            document.getElementById('pct70').innerText = total > 0 ? `(${((c70/total)*100).toFixed(0)}%)` : '(0%)';
+            
+            document.getElementById('count10').innerText = `${c10} `;
+            document.getElementById('pct10').innerText = total > 0 ? `(${((c10/total)*100).toFixed(0)}%)` : '(0%)';
+        }
+
+        // Exportação em JSON (Backup completo)
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(operators, null, 2));
+            const dlAnchor = document.createElement('a');
+            dlAnchor.setAttribute("href", dataStr);
+            dlAnchor.setAttribute("download", `backup_matriz_702010_${new Date().toISOString().slice(0,10)}.json`);
+            document.body.appendChild(dlAnchor);
+            dlAnchor.click();
+            dlAnchor.remove();
+        }
+
+        // Importação de arquivo JSON
+        function importData(e) {
+            const fileReader = new FileReader();
+            fileReader.onload = function(event) {
+                try {
+                    const imported = JSON.parse(event.target.result);
+                    if (Array.isArray(imported)) {
+                        operators = imported;
+                        saveToLocalStorage();
+                        render();
+                        alert("Backup importado com sucesso!");
+                    } else {
+                        alert("Ficheiro inválido. Certifique-se de escolher um arquivo JSON válido.");
+                    }
+                } catch (err) {
+                    alert("Erro ao ler o ficheiro.");
+                }
+            };
+            if (e.target.files[0]) {
+                fileReader.readAsText(e.target.files[0]);
+            }
+        }
+
+        // Exportação CSV (Para Google Sheets/Excel)
+        function exportToCSV() {
+            if (operators.length === 0) {
+                alert("Não existem dados para exportar.");
+                return;
+            }
+            let csv = "Nome,Setor,Performance,Comportamento,Potencial,Nota_Final,Evidencias\n";
+            operators.forEach(op => {
+                const nota = calculateFinalGrade(op).toFixed(2);
+                csv += `"${op.nome}","${op.setor}",${op.performance},${op.comportamento},${op.potencial},${nota},"${op.evidencias || ''}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `matriz_702010_${new Date().toISOString().slice(0,10)}.csv`;
+            link.click();
+        }
+    </script>
+</body>
+</html>
